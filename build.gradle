@@ -6,7 +6,7 @@ plugins {
 }
 
 group = 'com.coding404'
-version = '0.0.1-SNAPSHOT'
+version = '0.0.1'
 
 java {
 	sourceCompatibility = '11'
@@ -37,6 +37,9 @@ dependencies {
 	
 	 //jdbc로그
     implementation 'org.bgee.log4jdbc-log4j2:log4jdbc-log4j2-jdbc4.1:1.16'
+    
+    //
+    implementation 'com.google.code.gson:gson:2.8.5' //자바측 json변환 lib
 }
 
 tasks.named('test') {

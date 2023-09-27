@@ -33,4 +33,6 @@ public class ProductVO {
 	private String prod_content;
 	//@NotBlank
 	private String prod_comment;
+	//join 결과
+	private String category_nav;
 }

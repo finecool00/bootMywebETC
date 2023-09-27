@@ -41,5 +41,15 @@
     </div>
   </div>
 
+	<script>
+		
+		let btn = document.querySelector(".kakaoBtn");
+		btn.onclick = function() {
+			location.href='https://kauth.kakao.com/oauth/authorize?response_type=code&client_id=22a419871ff76ae57fa7cf44633dbc79&redirect_uri=http://127.0.0.1:8282/user/kakao';
+		}
+		
+	</script>
+
+
 </body>
 </html>

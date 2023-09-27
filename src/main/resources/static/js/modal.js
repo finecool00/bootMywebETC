@@ -16,7 +16,7 @@ $(document).ready(function() {
       e.preventDefault();
       window.scrollTo({top: 0, behavior:"smooth"}); //브라우저위로이동
       document.body.style.overflow = "hidden"; //body에 들어가면 스크롤감춤
-      modalOn();
+      //modalOn();
     });
   });
   //끄기이벤트

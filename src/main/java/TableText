@@ -13,3 +13,36 @@ CREATE TABLE PRODUCT(
     PROD_CONTENT VARCHAR(5000), 		##내용
     PROD_COMMENT VARCHAR(5000)		##메모
 );
+
+###############################
+# mysql subquery
+select * 
+from (
+select  @rownum := @rownum + 1 as rn,
+		a.* 
+      from (
+             select * 
+                   from product 
+                   where prod_writer = 'admin'
+                   order by prod_id desc
+	 ) as a, (select @rownum := 0) as b
+) as c
+where rn > 0 and rn <= 20;
+
+######### mysql limit ##########
+select * from product 
+#where prod_writer = 'admin' 
+order by prod_id desc
+limit 0, 5; #데이터의 시작, 시작부터 몇개의 데이터를 가져올건지
+
+
+############################파일업로드 테이블############################
+CREATE TABLE PRODUCT_UPLOAD (
+	UPLOAD_NO INT PRIMARY KEY auto_increment,
+	FILENAME varchar(100) not null, ##실제파일명
+	FILEPATH varchar(100) not null, ##폴더명
+	UUID varchar(50) not null, ##UUID명
+	REGDATE TIMESTAMP default now(),
+	PROD_ID INT, ##FK
+	PROD_WRITER VARCHAR(20) ##FK
+);

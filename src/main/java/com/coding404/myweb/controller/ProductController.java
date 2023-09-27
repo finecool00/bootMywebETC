@@ -2,24 +2,23 @@ package com.coding404.myweb.controller;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.validation.Valid;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.validation.Errors;
-import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.coding404.myweb.command.ProductVO;
 import com.coding404.myweb.product.service.ProductService;
+import com.coding404.myweb.util.Criteria;
+import com.coding404.myweb.util.PageVO;
 
 @Controller
 @RequestMapping("/product")
@@ -31,12 +30,23 @@ public class ProductController {
 	private ProductService productService;
 
 	@GetMapping("/productList")
-	public String list(Model model) {
+	public String list(Model model, Criteria cri) {
 		
 		//로그인 기능이 없으므로 admin 이라는 계정기반으로 조회
 		String writer = "admin";
-		ArrayList<ProductVO> list = productService.getList(writer);
+		//1st 페이징 설정 전
+//		ArrayList<ProductVO> list = productService.getList(writer);
+		
+		//2nd 페이징 설정
+		ArrayList<ProductVO> list = productService.getList(writer, cri);
 		model.addAttribute("list", list);
+		
+		int total = productService.getTotal(writer, cri);
+		PageVO pageVO = new PageVO(cri, total);
+		model.addAttribute("pageVO", pageVO);
+		
+		System.out.println(pageVO.toString());
+ 		
 		return "product/productList";
 	}
 	@GetMapping("/productReg")
@@ -57,9 +67,22 @@ public class ProductController {
 	//Post방식
 	//등록요청
 	@PostMapping("/registForm")
-	public String registForm(ProductVO vo, RedirectAttributes ra) {
+	public String registForm(ProductVO vo, RedirectAttributes ra, @RequestParam("file") List<MultipartFile> list) {
 		
-		int result = productService.productRegist(vo);
+		
+		//1. 빈 객체 검사
+		list = list.stream().filter(t -> t.isEmpty() == false).collect(Collectors.toList());
+		//2. 확장자 검사
+		for(MultipartFile file: list) {
+			//System.out.println(file.getContentType());
+			if(file.getContentType().contains("image") == false) {
+				ra.addFlashAttribute("msg", "jpg, jpeg, png 이미지 파일만 등록이 가능합니다.");
+				return "redirect:/product/productList"; //이미지가 아니라면 list목록으로 
+			}
+		}
+		
+		//3. 파일을 처리하는 작업은 service위임 => 애시당초에 controller Request객체를 받고 service 위임전략
+		int result = productService.productRegist(vo, list);
 		String msg = result == 1 ? "등록되었습니다" : "등록실패";
 		ra.addFlashAttribute("msg", msg);
 		
@@ -70,7 +93,7 @@ public class ProductController {
 	//post요청
 	//수정요청
 	@PostMapping("/modifyForm")
-	public String modifyForm(ProductVO vo, RedirectAttributes ra ){
+	public String modifyForm(ProductVO vo, RedirectAttributes ra){
 		System.out.println(vo.toString());
 		//메서드명 = productUpdate()
 		//데이터베이스 업데이트 진행
